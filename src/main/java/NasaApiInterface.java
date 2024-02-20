@@ -3,6 +3,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import components.NeoButtonCreator;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.HttpResponse;
 
 public class NasaApiInterface {
 
@@ -40,7 +45,24 @@ public class NasaApiInterface {
 
     //Function to fetch the data of Asteroids - NeoWs
     private static void fetchNeoData(String startDate, String endDate) {
+        //Key to use the API
+        String apiKey = "dMYntn9O9myFh49JeUyXopRPqhLaA4lOQcFTHRMS";
+        //URI of the API with the dates
+        String uri = "https://api.nasa.gov/neo/rest/v1/feed?start_date=" + startDate + "&end_date=" + endDate + "&api_key=" + apiKey;
 
+        //ClosableHttpClient use to make a Get request froma URL
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+            //Make the request from the created URL
+            HttpGet request = new HttpGet(uri);
+            //get the response from the API
+            HttpResponse response = client.execute(request);
+            //Parse the response to string
+            String responseBody = EntityUtils.toString(response.getEntity());
+            //Print in console(ver de cambiar a algo mas amigable)
+            System.out.println(responseBody);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 }
