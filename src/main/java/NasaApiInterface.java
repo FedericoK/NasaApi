@@ -66,6 +66,7 @@ public class NasaApiInterface {
             prop.load(input);
             apiKey = prop.getProperty("nasaApiKey");
         } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "An error was found while loading the configuration:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
 
@@ -87,57 +88,63 @@ public class NasaApiInterface {
             LocalDate startDate = LocalDate.parse(startDateStr);
             LocalDate endDate = LocalDate.parse(endDateStr);
 
-            //Initialize a List of stings, so we can gather all of our data
-            List<String[]> dataRows = new ArrayList<>();
-
-            //in the for we use date that start with our statDate
-            //it will continue only if the current date is not a day after the endDate
-            //it add 1 day after every loop
-            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-                //Parse the current date to YYYY-MM-DD with DateTimeFormatter.ISO_LOCAL_DATE
-                String dateKey = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
-                if (!nearEarthObjects.has(dateKey)) {
-                    continue; // Skip dates without NEO data
-                }
-                //get the JSONArray that has as key the current date
-                JSONArray neosForDate = nearEarthObjects.getJSONArray(dateKey);
-
-                //we loop through every object inside our current Date array
-                for (int i = 0; i < neosForDate.length(); i++) {
-                    JSONObject neo = neosForDate.getJSONObject(i);//get the current NEO object(i)
-                    //data inside other object or arrays
-                    JSONObject diameter = neo.getJSONObject("estimated_diameter").getJSONObject("meters");
-                    JSONObject closeApproachData = neo.getJSONArray("close_approach_data").getJSONObject(0);
-                    JSONObject relativeVelocity = closeApproachData.getJSONObject("relative_velocity");
-                    JSONObject missDistance = closeApproachData.getJSONObject("miss_distance");
-
-                    //add all the data we need in a Array of stirng
-                    String[] rowData = new String[]{
-                            neo.getString("id"),//id of NEO
-                            dateKey,//date of the object
-                            neo.getString("name"),//Name
-                            neo.getBoolean("is_potentially_hazardous_asteroid") ? "Yes" : "No",//if true ->yes: false ->no
-                            String.valueOf(diameter.getDouble("estimated_diameter_min")),//get the value in string inside "meters" object
-                            String.valueOf(diameter.getDouble("estimated_diameter_max")),//get the value in string inside "meters" object
-                            relativeVelocity.getString("kilometers_per_hour"),//get KM/H inside "relative_velocity" object
-                            missDistance.getString("kilometers")//get kilometers inside "miss_distance" object
-                    };
-                    //add the rowdata of the current object into dataRows
-                    dataRows.add(rowData);
-                }
-            }
-
-
-            //we create a bidimensional array the same size of rows as the size of ou array dataRows
-            String[][] data = new String[dataRows.size()][];
-            //we transform dataRows into the bidimensional array we created
-            data = dataRows.toArray(data);
-
             // show the data in a new window
-            DataDisplayWindow.displayData(data);
-        } catch (Exception ex) {//catch if the request fail. noteForMe= make error window if posible
+            //manipulateData returns a String[][]
+            DataDisplayWindow.displayData(manipulateData(nearEarthObjects, startDate, endDate));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "An error was encounter, please verified your input and try again. \nError:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
+    }
+
+    //Manipulation of NEOdata objects
+    private static String[][] manipulateData(JSONObject nearEarthObjects, LocalDate startDate, LocalDate endDate) {
+        //Initialize a List of stings, so we can gather all of our data
+        List<String[]> dataRows = new ArrayList<>();
+
+        //in the for we use date that start with our statDate
+        //it will continue only if the current date is not a day after the endDate
+        //it add 1 day after every loop
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            //Parse the current date to YYYY-MM-DD with DateTimeFormatter.ISO_LOCAL_DATE
+            String dateKey = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+            if (!nearEarthObjects.has(dateKey)) {
+                continue; // Skip dates without NEO data
+            }
+            //get the JSONArray that has as key the current date
+            JSONArray neosForDate = nearEarthObjects.getJSONArray(dateKey);
+
+            //we loop through every object inside our current Date array
+            for (int i = 0; i < neosForDate.length(); i++) {
+                JSONObject neo = neosForDate.getJSONObject(i);//get the current NEO object(i)
+                //data inside other object or arrays
+                JSONObject diameter = neo.getJSONObject("estimated_diameter").getJSONObject("meters");
+                JSONObject closeApproachData = neo.getJSONArray("close_approach_data").getJSONObject(0);
+                JSONObject relativeVelocity = closeApproachData.getJSONObject("relative_velocity");
+                JSONObject missDistance = closeApproachData.getJSONObject("miss_distance");
+
+                //add all the data we need in an Array of String
+                String[] rowData = new String[]{
+                        neo.getString("id"),//id of NEO
+                        dateKey,//date of the object
+                        neo.getString("name"),//Name
+                        neo.getBoolean("is_potentially_hazardous_asteroid") ? "Yes" : "No",//if true ->yes: false ->no
+                        String.valueOf(diameter.getDouble("estimated_diameter_min")),//get the value in string inside "meters" object
+                        String.valueOf(diameter.getDouble("estimated_diameter_max")),//get the value in string inside "meters" object
+                        relativeVelocity.getString("kilometers_per_hour"),//get KM/H inside "relative_velocity" object
+                        missDistance.getString("kilometers")//get kilometers inside "miss_distance" object
+                };
+                //add the rowData of the current object into dataRows
+                dataRows.add(rowData);
+            }
+        }
+
+        //we create a bidimensional array the same size of rows as the size of ou array dataRows
+        String[][] data = new String[dataRows.size()][];
+        //we transform dataRows into the bidimensional array we created
+        data = dataRows.toArray(data);
+        //return data
+        return data;
     }
 
 }
