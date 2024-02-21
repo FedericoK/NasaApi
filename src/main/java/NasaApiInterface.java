@@ -2,6 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ import org.apache.http.HttpResponse;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import java.util.List;
+import java.util.Properties;
 
 public class NasaApiInterface {
 
@@ -53,8 +57,19 @@ public class NasaApiInterface {
 
     //Function to fetch the data of Asteroids - NeoWs
     private static void fetchNeoData(String startDateStr, String endDateStr) {
-        //define the apikey and the uri to make the request
-        String apiKey = "dMYntn9O9myFh49JeUyXopRPqhLaA4lOQcFTHRMS";
+        //we use Properties in order to get our APIKey
+        Properties prop = new Properties();
+        String apiKey = " ";
+
+        //declare my API key from the config file
+        try (InputStream input = new FileInputStream("src/config.properties")) {
+            prop.load(input);
+            apiKey = prop.getProperty("nasaApiKey");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        //Concat the uri for the request of the API
         String uri = "https://api.nasa.gov/neo/rest/v1/feed?start_date=" + startDateStr + "&end_date=" + endDateStr + "&api_key=" + apiKey;
 
         //in a try or catch we make a get request to the API
