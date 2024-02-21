@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class NeoButtonCreator {
+public class ButtonCreator {
 
     public static JButton createNeoButton(JTextField startDateField, JTextField endDateField, ActionListener actionListener) {
         JButton neoButton = new JButton("Get NEO Data");
