@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import components.ButtonCreator;
+import extras.ConfigLoader;
 import extras.DataDisplayWindow;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -22,10 +23,12 @@ import java.util.List;
 import java.util.Properties;
 
 public class NasaApiInterface {
+    //Create the apiKey and assing the value from out config.prperties
+    static String apiKey = ConfigLoader.loadApiKey("nasaApiKey");
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("NASA API NeoWs");//Tittle of the window
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//stop the program
         frame.setSize(600, 300);//Size of the windows
         frame.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 
@@ -42,8 +45,8 @@ public class NasaApiInterface {
             }
         };
 
-        //Creation of the Button
-        JButton neoButton = ButtonCreator.createNeoButton(startDateField, endDateField, actionListener);
+        //Creation of the Button, send only the actionListener
+        JButton neoButton = ButtonCreator.createNeoButton(actionListener);
 
         //Add the components to the window and we set visible=True
         frame.getContentPane().add(new JLabel("Start Date (YYYY-MM-DD):"));
@@ -57,19 +60,6 @@ public class NasaApiInterface {
 
     //Function to fetch the data of Asteroids - NeoWs
     private static void fetchNeoData(String startDateStr, String endDateStr) {
-        //we use Properties in order to get our APIKey
-        Properties prop = new Properties();
-        String apiKey = " ";
-
-        //declare my API key from the config file
-        try (InputStream input = new FileInputStream("src/config.properties")) {
-            prop.load(input);
-            apiKey = prop.getProperty("nasaApiKey");
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(null, "An error was found while loading the configuration:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-        }
-
         //Concat the uri for the request of the API
         String uri = "https://api.nasa.gov/neo/rest/v1/feed?start_date=" + startDateStr + "&end_date=" + endDateStr + "&api_key=" + apiKey;
 
@@ -84,12 +74,12 @@ public class NasaApiInterface {
             //we get the near_earth_object JSONObject because it has all the info that we need
             JSONObject nearEarthObjects = jsonResponse.getJSONObject("near_earth_objects");
 
-            //PArse the date to LocalDate so we can use it on a for
+            //Parse the date to LocalDate, so we can use it on a for loop
             LocalDate startDate = LocalDate.parse(startDateStr);
             LocalDate endDate = LocalDate.parse(endDateStr);
 
             // show the data in a new window
-            //manipulateData returns a String[][]
+            // manipulateData returns a String[][]
             DataDisplayWindow.displayData(manipulateData(nearEarthObjects, startDate, endDate));
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "An error was encounter, please verified your input and try again. \nError:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

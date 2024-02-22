@@ -8,7 +8,7 @@ public class DataDisplayWindow {
         //we run the function async
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("NEO Data");//Creates a new window with the given title
-            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);//only close the window
             frame.setSize(1000, 500);//size of the window
 
             //Set the names of the columns for the table
