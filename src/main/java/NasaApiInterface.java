@@ -73,6 +73,7 @@ public class NasaApiInterface {
             JSONObject jsonResponse = new JSONObject(responseBody);
             //we get the near_earth_object JSONObject because it has all the info that we need
             JSONObject nearEarthObjects = jsonResponse.getJSONObject("near_earth_objects");
+            int elementCount = jsonResponse.getInt("element_count");//get the data of total NEO elements
 
             //Parse the date to LocalDate, so we can use it on a for loop
             LocalDate startDate = LocalDate.parse(startDateStr);
@@ -80,7 +81,7 @@ public class NasaApiInterface {
 
             // show the data in a new window
             // manipulateData returns a String[][]
-            DataDisplayWindow.displayData(manipulateData(nearEarthObjects, startDate, endDate));
+            DataDisplayWindow.displayData(manipulateData(nearEarthObjects, startDate, endDate),elementCount);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, "An error was encounter, please verified your input and try again. \nError:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
