@@ -41,6 +41,16 @@ public class NasaApiInterface {
             public void actionPerformed(ActionEvent e) {
                 String startDate = startDateField.getText();
                 String endDate = endDateField.getText();
+                //Verifies if the dates fields have the correct regular expression
+                if (startDate.isEmpty() || endDate.isEmpty()){
+                    // Error window
+                    JOptionPane.showMessageDialog(frame, "Please, fill out both dates!", "Validation error", JOptionPane.ERROR_MESSAGE);
+                    return; // Stops the execution of the ActionListener
+                } else if (!startDate.matches("\\d{4}-\\d{2}-\\d{2}") || !endDate.matches("\\d{4}-\\d{2}-\\d{2}")) {// Verifies if the dates aren't empty
+                    // Error window
+                    JOptionPane.showMessageDialog(frame, "Please, use the format YYYY-MM-DD!", "Validation error", JOptionPane.ERROR_MESSAGE);
+                    return; // Stops the execution of the ActionListener
+                }
                 fetchNeoData(startDate, endDate);
             }
         };
@@ -83,7 +93,7 @@ public class NasaApiInterface {
             // manipulateData returns a String[][]
             DataDisplayWindow.displayData(manipulateData(nearEarthObjects, startDate, endDate),elementCount);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null, "An error was encounter, please verified your input and try again. \nError:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "An error was encounter, please try again later. \nError:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
     }
